@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,12 +56,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WelcomeScreenTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    Greeting(
+//                        name = "Android",
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                }
+//                LaunchScreen()
             }
         }
     }
@@ -68,13 +70,30 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 @Preview
-fun LaunchScreen() {
+fun HomeScreen() {
+    var currentScreen by rememberSaveable() { mutableStateOf(true) }
+
+    if (currentScreen) {
+        LaunchScreen(onNavigate = { currentScreen = false })
+    } else {
+        SecondScreen(onNavigate = { currentScreen = true })
+    }
+}
+
+@Composable
+fun LaunchScreen(onNavigate: () -> Unit) {
     val fonts = FontFamily(Font(R.font.museo_sans_500), Font(R.font.museo_sans_300))
     var showNewComposable by rememberSaveable { mutableStateOf(false) }
-    Column(modifier = Modifier.fillMaxSize().background(Color.Black), verticalArrangement = Arrangement.SpaceAround) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Black), verticalArrangement = Arrangement.SpaceAround) {
         val image = painterResource(R.drawable.logo_green_flag)
         val check = painterResource(R.drawable.tick)
-        Image(image, contentDescription = "logo",  modifier = Modifier.fillMaxWidth().padding(45.dp, 55.dp, 45.dp,0.dp).size(100.dp))
+
+        Image(image, contentDescription = "logo",  modifier = Modifier
+            .fillMaxWidth()
+            .padding(45.dp, 55.dp, 45.dp, 0.dp)
+            .size(100.dp))
 
         Column(modifier = Modifier.padding(40.dp, 80.dp, 0.dp,0.dp)) {
             Text("GreenFlag customers can create an account to access", fontSize = 24.sp, fontFamily = fonts, color = Color.White, fontWeight = FontWeight.Medium, modifier = Modifier.padding(0.dp, 0.dp))
@@ -115,21 +134,20 @@ fun LaunchScreen() {
         }
 
 
-        Button(onClick = { showNewComposable = true }, shape = RectangleShape, colors = ButtonDefaults.buttonColors(
+        Button(onClick = onNavigate , shape = RectangleShape, colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent), modifier = Modifier.padding(0.dp,130.dp,0.dp,0.dp) ) {
             Box() {
                 Image(painterResource(R.drawable.gradient_button_background), contentDescription = "gradient")
                 Text(
                     text = "Create an Account",
+                    textAlign = TextAlign.Center,
                     fontSize = 24.sp,
                     fontFamily = fonts,
                     color = Color.Black,
                     fontWeight = FontWeight.Thin,
-                    modifier = Modifier.padding(60.dp, 11.dp, 0.dp, 0.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                 )
-                if (showNewComposable) {
-                    SecondScreen()
-                }
+
             }
 
         }
@@ -137,8 +155,8 @@ fun LaunchScreen() {
 }
 
 @Composable
-@Preview
-fun SecondScreen() {
+
+fun SecondScreen(onNavigate: () -> Unit) {
     val fonts = FontFamily(Font(R.font.museo_sans_500), Font(R.font.museo_sans_300))
     var showNewComposable by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
@@ -151,32 +169,31 @@ fun SecondScreen() {
 
     val context = LocalContext.current
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.Black).padding(0.dp, 6.dp, 0.dp, 0.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(0.dp, 6.dp, 0.dp, 0.dp)
     , verticalArrangement = Arrangement.SpaceEvenly) {
 
         Column {
             Row(modifier = Modifier.fillMaxWidth()) {
-                Box() {
-                    Button(onClick = { showNewComposable = true }, colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent)) {
-                        Text(
-                            "<",
-                            color = Color.Green,
-                            fontSize = 50.sp,
-                            fontFamily = fonts,
-                            fontWeight = FontWeight.Light,
-                            modifier = Modifier.padding(0.dp, 0.dp, 20.dp, 0.dp).clickable {
+                Box(modifier = Modifier) {
+                    Text(
+                        "<",
+                        color = Color.Green,
+                        fontSize = 50.sp,
+                        fontFamily = fonts,
+                        fontWeight = FontWeight.Light,
+                        modifier = Modifier
+                            .padding(20.dp, 0.dp, 20.dp, 0.dp)
+                            .clickable(onClick = onNavigate ))
 
-                            }
-                        )
-                    }
+                }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Conditionally show the new composable
-                    if (showNewComposable) {
-                        LaunchScreen()
-                    }
+
 //                    Text(
 //                        "<",
 //                        color = Color.Green,
@@ -187,13 +204,13 @@ fun SecondScreen() {
 //
 //                        }
 //                    )
-                }
+
                 Text(
                     "Create an account",
                     color = Color.White,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Normal,
-                    modifier = Modifier.padding(0.dp, 23.dp, 0.dp, 0.dp)
+                    modifier = Modifier.padding(10.dp, 14.dp, 0.dp, 0.dp)
                 )
             }
             HorizontalDivider(
@@ -224,12 +241,16 @@ fun SecondScreen() {
                                     isValidEmail = isValidEmail(email)
 
                                     if (!isValidEmail) {
-                                        Toast.makeText(context, "Invalid email address", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Invalid email address",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                                 }
 
 
-                        },
+                            },
                     )
                 }
                 Column(modifier = Modifier.padding(top = 30.dp)) {
@@ -245,16 +266,22 @@ fun SecondScreen() {
                         label = { Text("Enter your password") },
                         value = password,
                         onValueChange = { password = it },
-                        modifier = Modifier.background(Color.White).onFocusChanged {
-                            if (!it.isFocused) {
-                                isValidPassword = isValidPassword1(password)
+                        modifier = Modifier
+                            .background(Color.White)
+                            .onFocusChanged {
+                                if (!it.isFocused) {
+                                    isValidPassword = isValidPassword1(password)
 
-                                if (!isValidPassword) {
-                                    Toast.makeText(context, "Invalid password", Toast.LENGTH_SHORT).show()
+                                    if (!isValidEmail) {
+                                        Toast.makeText(
+                                            context,
+                                            "Invalid password",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
-                            }
 
-                        }
+                            }
                     )
                 }
                 Column(modifier = Modifier.padding(top = 30.dp)) {
@@ -270,13 +297,19 @@ fun SecondScreen() {
                         label = { Text("Confirm your password") },
                         value = repeatPassword,
                         onValueChange = { repeatPassword = it },
-                        modifier = Modifier.background(Color.White).onFocusChanged {
-                            if (!it.isFocused) {
-                                if (repeatPassword != password) {
-                                    Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                        modifier = Modifier
+                            .background(Color.White)
+                            .onFocusChanged {
+                                if (!it.isFocused) {
+                                    if (repeatPassword != password) {
+                                        Toast.makeText(
+                                            context,
+                                            "Passwords do not match",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                             }
-                        }
                     )
                 }
 
@@ -285,17 +318,18 @@ fun SecondScreen() {
 
             }
 
-            Button(onClick = { /*TODO*/ }, shape = RectangleShape, colors = ButtonDefaults.buttonColors(
+            Button(onClick = {  }, shape = RectangleShape, colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent), modifier = Modifier.padding(0.dp,100.dp,0.dp,0.dp) ) {
                 Box() {
                     Image(painterResource(R.drawable.gradient_button_background), contentDescription = "gradient")
                     Text(
                         text = "Next",
                         fontSize = 24.sp,
+                        textAlign = TextAlign.Center,
                         fontFamily = fonts,
                         color = Color.Black,
                         fontWeight = FontWeight.Thin,
-                        modifier = Modifier.padding(135.dp, 11.dp, 0.dp, 0.dp)
+                        modifier = Modifier.fillMaxWidth().padding(top = 11.dp)
                     )
                 }
             }
@@ -304,6 +338,10 @@ fun SecondScreen() {
     }
 }
 
+@Composable
+fun EmailInputField(isValid: Boolean) {
+
+}
 
 
     @Composable
