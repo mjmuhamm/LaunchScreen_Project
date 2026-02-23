@@ -127,10 +127,11 @@ fun LaunchScreen() {
                     fontWeight = FontWeight.Thin,
                     modifier = Modifier.padding(60.dp, 11.dp, 0.dp, 0.dp)
                 )
+                if (showNewComposable) {
+                    SecondScreen()
+                }
             }
-            if (showNewComposable) {
-                SecondScreen()
-            }
+
         }
     }
 }
@@ -221,10 +222,12 @@ fun SecondScreen() {
                             .onFocusChanged() { focusState ->
                                 if (!focusState.isFocused) {
                                     isValidEmail = isValidEmail(email)
+
+                                    if (!isValidEmail) {
+                                        Toast.makeText(context, "Invalid email address", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
-                                if (!isValidEmail) {
-                                    Toast.makeText(context, "Invalid email address", Toast.LENGTH_SHORT).show()
-                                }
+
 
                         },
                     )
@@ -246,7 +249,7 @@ fun SecondScreen() {
                             if (!it.isFocused) {
                                 isValidPassword = isValidPassword1(password)
 
-                                if (!isValidEmail) {
+                                if (!isValidPassword) {
                                     Toast.makeText(context, "Invalid password", Toast.LENGTH_SHORT).show()
                                 }
                             }
@@ -301,10 +304,6 @@ fun SecondScreen() {
     }
 }
 
-@Composable
-fun EmailInputField(isValid: Boolean) {
-
-}
 
 
     @Composable
