@@ -172,6 +172,7 @@ fun SecondScreen(onNavigate: () -> Unit) {
     var isValidEmail by remember { mutableStateOf(false) }
     var isValidPassword by remember { mutableStateOf(false) }
     var isValidRepeatPassword by remember { mutableStateOf(false) }
+    var enableButton by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     Column(
@@ -246,10 +247,16 @@ fun SecondScreen(onNavigate: () -> Unit) {
                                 color = MaterialTheme.colorScheme.error, // red color
                                 fontSize = 12.sp, modifier = Modifier.background(Color.Transparent)
                             )
+
                         },
+
                         singleLine = true,
                         modifier = Modifier
-                            .background(Color.Transparent))
+                            .background(Color.Transparent).onFocusChanged {
+                                if (!it.isFocused) {
+                                    enableButton = isValidEmail && isValidPassword && isValidRepeatPassword
+                                }
+                            })
 
                 }
                 Column(modifier = Modifier.padding(top = 30.dp)) {
@@ -267,11 +274,15 @@ fun SecondScreen(onNavigate: () -> Unit) {
                         isError = isValidPassword,
                         onValueChange = { password = it },
                         supportingText = {
-                            Text(
-                                text = passwordErrorMessage, // error message
-                                color = MaterialTheme.colorScheme.error, // red color
-                                fontSize = 12.sp, modifier = Modifier.background(Color.Transparent)
-                            )
+                            if (isValidPassword) {
+                                Text(
+                                    text = passwordErrorMessage, // error message
+                                    color = MaterialTheme.colorScheme.error, // red color
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.background(Color.Transparent)
+                                )
+                                enableButton = isValidEmail && isValidPassword && isValidRepeatPassword
+                            }
                         },
                         modifier = Modifier
                             .background(Color.Transparent)
@@ -302,7 +313,11 @@ fun SecondScreen(onNavigate: () -> Unit) {
                         },
                         singleLine = true,
                         modifier = Modifier
-                            .background(Color.Transparent)
+                            .background(Color.Transparent).onFocusChanged {
+                                if (!it.isFocused) {
+                                    enableButton = isValidEmail && isValidPassword && isValidRepeatPassword
+                                }
+                            }
 
                     )
                 }
