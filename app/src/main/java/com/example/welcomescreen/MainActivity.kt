@@ -76,10 +76,10 @@ fun HomeScreen() {
     var currentScreen by rememberSaveable() { mutableStateOf(true) }
 
     if (currentScreen) {
-        LaunchScreen(onNavigate = { currentScreen = true })
+        LaunchScreen(onNavigate = { currentScreen = false})
 
     } else {
-        SecondScreen(onNavigate = { currentScreen = false })
+        SecondScreen(onNavigate = { currentScreen = true })
 
     }
 }
