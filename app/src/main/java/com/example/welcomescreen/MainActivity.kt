@@ -22,10 +22,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,9 +76,10 @@ fun HomeScreen() {
     var currentScreen by rememberSaveable() { mutableStateOf(true) }
 
     if (currentScreen) {
-        LaunchScreen(onNavigate = { currentScreen = false })
-    } else {
         SecondScreen(onNavigate = { currentScreen = true })
+
+    } else {
+        LaunchScreen(onNavigate = { currentScreen = false })
     }
 }
 
@@ -158,14 +161,16 @@ fun LaunchScreen(onNavigate: () -> Unit) {
 
 fun SecondScreen(onNavigate: () -> Unit) {
     val fonts = FontFamily(Font(R.font.museo_sans_500), Font(R.font.museo_sans_300))
-    var showNewComposable by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var repeatPassword by rememberSaveable { mutableStateOf("") }
 
-    var isValidEmail by remember { mutableStateOf(true) }
-    var isValidPassword by remember { mutableStateOf(true) }
-    var isValidRepeatPassword by remember { mutableStateOf(true) }
+    var emailErrorMessage by remember { mutableStateOf("") }
+    var passwordErrorMessage by remember { mutableStateOf("") }
+    var repeatPasswordErrorMessage by remember { mutableStateOf("") }
+    var isValidEmail by remember { mutableStateOf(false) }
+    var isValidPassword by remember { mutableStateOf(false) }
+    var isValidRepeatPassword by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     Column(
@@ -232,26 +237,19 @@ fun SecondScreen(onNavigate: () -> Unit) {
                     TextField(
                         label = { Text("Enter your email address") },
                         value = email,
-                        isError = !isValidEmail,
+                        isError = isValidEmail,
                         onValueChange = { email = it },
+                        supportingText = {
+                            Text(
+                                text = emailErrorMessage, // error message
+                                color = MaterialTheme.colorScheme.error, // red color
+                                fontSize = 12.sp, modifier = Modifier.background(Color.Transparent)
+                            )
+                        },
+                        singleLine = true,
                         modifier = Modifier
-                            .background(Color.White)
-                            .onFocusChanged() { focusState ->
-                                if (!focusState.isFocused) {
-                                    isValidEmail = isValidEmail(email)
+                            .background(Color.Transparent))
 
-                                    if (!isValidEmail) {
-                                        Toast.makeText(
-                                            context,
-                                            "Invalid email address",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-
-
-                            },
-                    )
                 }
                 Column(modifier = Modifier.padding(top = 30.dp)) {
                     Text(
@@ -265,23 +263,18 @@ fun SecondScreen(onNavigate: () -> Unit) {
                     TextField(
                         label = { Text("Enter your password") },
                         value = password,
+                        isError = isValidPassword,
                         onValueChange = { password = it },
+                        supportingText = {
+                            Text(
+                                text = passwordErrorMessage, // error message
+                                color = MaterialTheme.colorScheme.error, // red color
+                                fontSize = 12.sp, modifier = Modifier.background(Color.Transparent)
+                            )
+                        },
                         modifier = Modifier
-                            .background(Color.White)
-                            .onFocusChanged {
-                                if (!it.isFocused) {
-                                    isValidPassword = isValidPassword1(password)
+                            .background(Color.Transparent)
 
-                                    if (!isValidEmail) {
-                                        Toast.makeText(
-                                            context,
-                                            "Invalid password",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-
-                            }
                     )
                 }
                 Column(modifier = Modifier.padding(top = 30.dp)) {
@@ -296,20 +289,20 @@ fun SecondScreen(onNavigate: () -> Unit) {
                     TextField(
                         label = { Text("Confirm your password") },
                         value = repeatPassword,
+                        isError = isValidRepeatPassword,
                         onValueChange = { repeatPassword = it },
+                        supportingText = {
+                            Text(
+                                text = repeatPasswordErrorMessage, // error message
+                                color = MaterialTheme.colorScheme.error, // red color
+                                fontSize = 12.sp,
+
+                            )
+                        },
+                        singleLine = true,
                         modifier = Modifier
-                            .background(Color.White)
-                            .onFocusChanged {
-                                if (!it.isFocused) {
-                                    if (repeatPassword != password) {
-                                        Toast.makeText(
-                                            context,
-                                            "Passwords do not match",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                            }
+                            .background(Color.Transparent)
+
                     )
                 }
 
@@ -318,7 +311,32 @@ fun SecondScreen(onNavigate: () -> Unit) {
 
             }
 
-            Button(onClick = {  }, shape = RectangleShape, colors = ButtonDefaults.buttonColors(
+            Button(onClick = {
+                if (!isValidEmail(email)) {
+                    isValidEmail = true
+                    emailErrorMessage = "Please enter a valid email address"
+                } else if (!isValidPassword(password)) {
+                    isValidEmail = false
+                    emailErrorMessage = ""
+                    isValidPassword = true
+                    passwordErrorMessage = "Please enter a valid password"
+                } else if (password != repeatPassword) {
+                    isValidEmail = false
+                    emailErrorMessage = ""
+                    isValidPassword = false
+                    passwordErrorMessage = ""
+                    isValidRepeatPassword = true
+                    repeatPasswordErrorMessage = "Passwords do not match"
+                } else {
+                    isValidEmail = false
+                    emailErrorMessage = ""
+                    isValidPassword = false
+                    passwordErrorMessage = ""
+                    isValidRepeatPassword = false
+                    repeatPasswordErrorMessage = ""
+                    Toast.makeText(context, "Account created successfully", Toast.LENGTH_SHORT).show()
+                }
+                             }, shape = RectangleShape, colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent), modifier = Modifier.padding(0.dp,100.dp,0.dp,0.dp) ) {
                 Box() {
                     Image(painterResource(R.drawable.gradient_button_background), contentDescription = "gradient")
@@ -363,7 +381,7 @@ fun isValidEmail(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
-fun isValidPassword1(password: String): Boolean {
+fun isValidPassword(password: String): Boolean {
     // Regex explanation:
     // (?=.*[0-9])       -> at least one digit
     // (?=.*[a-z])       -> at least one lowercase
